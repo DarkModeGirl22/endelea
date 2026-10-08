@@ -1,8 +1,9 @@
+
 # Endelea
 
 **Focus hours become a home.** You work, the app counts your real focus time, and you spend those hours on a virtual home, furniture and objects. Around it sits a private diary with an AI companion that notices how you are doing.
 
-> ▶ **Demo video:** `ADD_YOUR_VIDEO_LINK_HERE`
+https://github.com/user-attachments/assets/cdffd292-cafb-461d-8b42-3158572d8c9f
 
 ![My House](docs/house.png)
 
@@ -11,7 +12,7 @@
 You need [Python 3.10+](https://www.python.org/downloads/). Then:
 
 ```bash
-git clone https://github.com/YOUR_NAME/endelea.git
+git clone https://github.com/DarkModeGirl22/endelea.git
 cd endelea
 pip install -r requirements.txt
 python -m uvicorn backend.main:app --port 8000
