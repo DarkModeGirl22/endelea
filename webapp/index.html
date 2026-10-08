@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Endelea</title>
+<style>
+  :root { --bg:#FFF4DC; --panel:#FFFFFF; --card:#fffdf6; --ink:#2B2A33; --line:#2B2A33; --soft:#6b6672; --hdr:#FFB627; --hov:#fff0c4; --dot:#f3dfae;
+          --warnbg:#fff0ea; --warnink:#b83f1c; --plate:#FFF4DC;
+          --sun:#FFB627; --coral:#FF7043; --teal:#1BB5A8; --lilac:#7B61FF; }
+  body.dark { --bg:#1d1b2b; --panel:#2a2840; --card:#322f4d; --ink:#F4EFE0; --line:#6c63c7; --soft:#b4b0c8; --hdr:#4a3a8a; --hov:#3d3b58; --dot:#2a2840;
+              --warnbg:#4a2a2a; --warnink:#ffb199; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); background-image:radial-gradient(var(--dot) 1.5px, transparent 1.5px); background-size:22px 22px;
+         color:var(--ink); font-family:"Trebuchet MS","Segoe UI",Verdana,sans-serif; }
+  header { display:flex; justify-content:space-between; align-items:center; padding:10px 28px; background:var(--hdr); border-bottom:3px solid var(--line); }
+  .logo { font-size:30px; font-weight:800; letter-spacing:1px; }
+  .logo span { color:var(--coral); }
+  .me { display:flex; align-items:center; gap:12px; }
+  .modebtn { font-size:20px; cursor:pointer; background:var(--panel); border:2px solid var(--line); border-radius:50%; width:42px; height:42px; }
+  .modebtn:hover { transform:rotate(20deg); }
+  .info { background:var(--panel); border:2px solid var(--line); border-radius:14px; padding:6px 14px; text-align:right; box-shadow:3px 3px 0 var(--line); }
+  .info .name { font-size:12px; color:var(--soft); }
+  .info .hrs { font-size:22px; font-weight:800; color:var(--teal); line-height:1.1; }
+  .info .lvl { font-size:12px; }
+  .bubble { width:76px; height:76px; border-radius:50%; border:4px solid #fff; outline:3px solid var(--line); overflow:hidden; cursor:pointer; background:#CFF3EF; }
+  .bubble:hover { transform:scale(1.05); }
+  nav { display:flex; gap:8px; padding:14px 28px 6px; flex-wrap:wrap; }
+  nav button { background:var(--panel); border:2px solid var(--line); border-radius:20px; color:var(--ink); font-family:inherit; font-weight:700; font-size:14px; padding:7px 16px; cursor:pointer; }
+  nav button:hover { transform:translateY(-2px); background:var(--hov); }
+  nav button.active { background:var(--coral); color:#fff; }
+  main { padding:18px 28px 40px; }
+  .tab { display:none; }
+  .tab.active { display:block; }
+  .card { background:var(--panel); border:2px solid var(--line); border-radius:16px; padding:20px; max-width:620px; box-shadow:5px 5px 0 var(--line); margin-bottom:22px; }
+  .card h2, .card h3 { margin-top:0; }
+  .soon { color:var(--soft); font-style:italic; }
+  ul { padding-left:20px; }
+  button[data-act] { font-family:inherit; font-weight:700; cursor:pointer; border-radius:16px; padding:6px 14px; border:2px solid var(--line); background:var(--sun); color:#2B2A33; margin:6px 6px 0 0; }
+  button[data-act]:hover { background:var(--coral); color:#fff; }
+  button[data-act].on { background:var(--coral); color:#fff; }
+  input { font-family:inherit; background:var(--panel); color:var(--ink); border:2px solid var(--line); border-radius:10px; padding:7px 10px; margin-right:6px; }
+  #task { width:70%; }
+  .warn { border:2px solid var(--coral); background:var(--warnbg); color:var(--warnink); padding:12px; border-radius:12px; margin:10px 0; }
+  #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--panel); border:2px solid var(--line); padding:10px 20px; border-radius:14px; box-shadow:4px 4px 0 var(--line); display:none; z-index:30; font-weight:700; }
+  #toast.bad { background:var(--warnbg); color:var(--warnink); border-color:var(--coral); }
+  #modal { position:fixed; inset:0; background:rgba(20,18,30,.55); display:none; align-items:center; justify-content:center; z-index:20; }
+  .mbox { background:var(--panel); border:3px solid var(--line); border-radius:18px; padding:26px; max-width:420px; box-shadow:6px 6px 0 var(--line); }
+
+  /* My House: room left, side panel right */
+  .stage { display:flex; gap:22px; align-items:flex-start; flex-wrap:wrap; }
+  #roomCard { flex:1 1 560px; max-width:780px; margin-bottom:0; }
+  .roomwrap { position:relative; }
+  .roomwrap svg { width:100%; display:block; border:2px solid var(--line); border-radius:12px; margin-bottom:12px; background:var(--plate); }
+  .roombtns { position:absolute; right:12px; bottom:24px; display:flex; gap:8px; }
+  .roombtns button { margin:0 !important; }
+  body.dark .roomwrap svg, body.dark .home svg { filter:brightness(.72) saturate(.9); }
+  #sidePanel { flex:0 0 340px; max-width:100%; display:none; margin-bottom:0; }
+  .crow { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px dashed var(--soft); }
+  .crow small { color:var(--soft); }
+  .cprev { width:54px; height:54px; flex:0 0 54px; background:var(--plate); border-radius:10px; }
+  .cprev svg, .prev svg, .disp svg, .th svg { width:100%; height:100%; display:block; }
+  .disp { height:170px; background:var(--plate); border:2px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px; }
+  .thumbs { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+  .th { background:var(--plate); border:2px solid var(--line); border-radius:10px; padding:4px; cursor:pointer; height:58px; }
+  .th.on { border-color:var(--coral); outline:2px solid var(--coral); }
+
+  /* shops */
+  .subnav { margin-bottom:16px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:22px; }
+  .item { background:var(--card); border:2px solid var(--line); border-radius:14px; padding:12px; box-shadow:4px 4px 0 var(--line); }
+  .prev { height:110px; background:var(--plate); border-radius:10px; margin-bottom:8px; padding:6px; }
+  .item h4 { margin:0 0 4px; }
+  .tag { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; margin-bottom:6px; }
+  .hint { font-size:12px; color:var(--soft); margin-top:4px; }
+
+  /* Real Estate */
+  #homes h3 { font-size:24px; margin:34px 0 18px; padding-bottom:6px; border-bottom:3px solid var(--line); }
+  .homegrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:26px; }
+  .home { background:var(--card); border:2px solid var(--line); border-radius:6px; padding:14px; position:relative; box-shadow:5px 5px 0 var(--line); }
+  .home:nth-child(odd) { transform:rotate(-.6deg); }
+  .home:nth-child(even) { transform:rotate(.5deg); }
+  .home::before { content:""; position:absolute; top:-11px; left:50%; width:70px; height:20px; margin-left:-35px; background:var(--teal); opacity:.85; transform:rotate(-3deg); }
+  .home:nth-child(2n)::before { background:var(--coral); }
+  .home:nth-child(3n)::before { background:var(--lilac); }
+  .home svg { width:100%; display:block; border:2px solid var(--line); margin-bottom:10px; }
+  .home h4 { margin:0 0 2px; font-size:18px; }
+  .m2 { color:var(--soft); font-size:13px; margin-bottom:8px; }
+  .price { display:flex; justify-content:space-between; font-size:14px; padding:3px 0; border-bottom:1px dotted var(--soft); }
+  .d { color:#b57a00; } .mo { color:#d04a22; } .by { color:#0e8a80; font-weight:bold; }
+  body.dark .d { color:#ffc94d; } body.dark .mo { color:#ff9a7a; } body.dark .by { color:#4fe0d2; }
+  .desc { display:none; margin:8px 0 0; font-size:13px; font-style:italic; }
+  .desc.show { display:block; }
+  .here { color:#0e8a80; font-weight:bold; margin:8px 0 0; }
+  body.dark .here { color:#4fe0d2; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Ende<span>lea</span></div>
+  <div class="me">
+    <button class="modebtn" id="modeBtn" title="Day / night mode">🌙</button>
+    <div class="info"><div class="name">Guest</div><div class="hrs" id="balance">... h</div><div class="lvl" id="lvl"></div></div>
+    <div class="bubble" id="avatarBubble" title="My profile"></div>
+  </div>
+</header>
+<nav id="menu">
+  <button class="active" data-tab="house">My House</button>
+  <button data-tab="realestate">Real Estate</button>
+  <button data-tab="furniture">Furniture</button>
+  <button data-tab="objects">Objects</button>
+  <button data-tab="sessions">Sessions</button>
+  <button data-tab="community">Community</button>
+  <button data-tab="profile">Profile</button>
+</nav>
+<main>
+  <section class="tab active" id="house">
+    <div class="stage">
+      <div class="card" id="roomCard"></div>
+      <aside class="card" id="sidePanel"></aside>
+    </div>
+  </section>
+  <section class="tab" id="realestate">
+    <p class="soon">Like real life: buying takes years of renting first. Prices are in hours. A rental lasts 24 h (day) or 30 days (month).</p>
+    <div id="homes"></div>
+  </section>
+  <section class="tab" id="furniture">
+    <p class="soon">For your home. Buy or rent it and it goes to your closet. Open the closet from your room to place it. Big furniture needs a big home!</p>
+    <div id="shop-furniture"></div>
+  </section>
+  <section class="tab" id="objects">
+    <p class="soon">For you. Buy or rent it and find it in 🎒 My Stuff (button on your room). Objects never go inside the room.</p>
+    <div id="shop-objects"></div>
+  </section>
+  <section class="tab" id="sessions">
+    <div class="card" id="sessionCard"></div>
+    <div class="card" id="workoutCard"></div>
+    <div class="card" id="historyCard"></div>
+  </section>
+  <section class="tab" id="community"><div class="card" id="communityCard"></div></section>
+  <section class="tab" id="profile">
+    <div class="card" id="profileCard"></div>
+</section>
+</main>
+<div id="toast"></div>
+<div id="modal"><div class="mbox" id="mbox"></div></div>
+<script>
+  const $ = id => document.getElementById(id);
+  const fmt = n => Number(n).toLocaleString("en-US");
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+  const CAT_ORDER = ["Studio (city)", "Flat near the forest", "Flat by the beach", "Luxury penthouse (city)", "House with garden", "Luxury house"];
+  const SCENES = ["city", "forest", "beach", "tower", "house", "villa"];
+  const SUBS = { furniture: [["furniture", "Furniture"], ["decor", "Decoration"]],
+                 objects: [["transport", "Transport"], ["clothes", "Clothes"], ["accessories", "Accessories"]] };
+  let ME = null, HOMES = [], SES = null, CAT = [], panel = null, sel = null, modalFor = null;
+  const subSel = { furniture: "furniture", objects: "transport" };
+
+  // ---------- day / night mode (bright by default) ----------
+  function setMode(dark) {
+    document.body.classList.toggle("dark", dark);
+    $("modeBtn").textContent = dark ? "☀️" : "🌙";
+    try { localStorage.setItem("endelea-dark", dark ? "1" : "0"); } catch (e) {}
+  }
+  $("modeBtn").addEventListener("click", () => setMode(!document.body.classList.contains("dark")));
+  let startDark = false;
+  try { startDark = localStorage.getItem("endelea-dark") === "1"; } catch (e) {}
+  setMode(startDark);
+
+  // ---------- drawing helpers ----------
+  const R = (x, y, w, h, f, o = 1) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}" opacity="${o}"/>`;
+  const C = (x, y, r, f, o = 1) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${f}" opacity="${o}"/>`;
+  const El = (x, y, rx, ry, f, o = 1) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${f}" opacity="${o}"/>`;
+  const P = (pts, f, o = 1) => `<polygon points="${pts}" fill="${f}" opacity="${o}"/>`;
+  const wheel = (x, y, r = 10) => `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#2B2A33" stroke-width="3"/>`;
+  const books = (cols, n) => Array.from({ length: n }, (_, i) => R(4 + i * 12, i % 3 === 0 ? 0 : 2, 9, i % 3 === 0 ? 12 : 10, cols[i % cols.length])).join("");
+  function wc(cx, y, cols, rows, dx, dy, w, h, f) {
+    const x0 = cx - ((cols - 1) * dx + w) / 2;
+    let o = "";
+    for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) o += R(x0 + i * dx, y + j * dy, w, h, f);
+    return o;
+  }
+  const tree = (x, s) => P(`${x},${100 - 30 * s} ${x - 10 * s},100 ${x + 10 * s},100`, "#3f9a52") + R(x - 1.5, 98, 3, 6, "#7a5a3a");
+
+  // ---------- shop items: one drawing per shape ----------
+  const SIZE = { wall: [24, 30], desk: [12, 16], deskbig: [28, 24], floor: [14, 64], big: [64, 40], rug: [92, 20], shelf: [96, 16], obj: [64, 40] };
+  const SHAPES = {
+    // wall
+    poster: c => R(0, 0, 24, 30, "#fff8e0") + R(2, 2, 20, 26, c) + C(12, 15, 5, "#fff8e0"),
+    clock: c => C(12, 15, 11, c) + C(12, 15, 9, "#fff8e0") + R(11.5, 8, 1, 7, "#2B2A33") + R(12, 14.5, 5, 1, "#2B2A33"),
+    mirror: c => R(0, 0, 24, 30, c) + R(2, 2, 20, 26, "#d6f1fa") + R(5, 5, 3, 18, "#fff", .7),
+    neon: c => C(12, 15, 13, c, .2) + P("14,1 5,17 11,17 9,29 19,11 13,11", c),
+    gallery: c => R(0, 0, 11, 14, "#2B2A33") + R(1.5, 1.5, 8, 11, c) + R(13, 0, 11, 9, "#2B2A33") + R(14.5, 1.5, 8, 6, "#FFB627") +
+                  R(13, 11, 11, 13, "#2B2A33") + R(14.5, 12.5, 8, 10, "#1BB5A8") + R(0, 16, 11, 14, "#2B2A33") + R(1.5, 17.5, 8, 11, "#FF7043"),
+    goldmirror: c => El(12, 15, 11, 14, c) + El(12, 15, 9, 12, "#d6f1fa") + R(7, 8, 2, 12, "#fff", .7),
+    sunpainting: c => R(0, 0, 24, 30, "#2B2A33") + R(2, 2, 20, 26, "#FFD66B") + C(12, 14, 6, c) + R(2, 20, 20, 8, "#1BB5A8"),
+    // desk
+    mug: c => R(1, 8, 8, 8, c) + R(9, 10, 3, 4, c) + R(2, 9, 6, 2, "#6b4a2b"),
+    plant: c => R(2, 10, 8, 6, "#c76b4a") + C(6, 6, 5, c) + C(2.5, 8, 3, c) + C(9.5, 8, 3, c),
+    candle: c => R(3, 6, 6, 10, c) + P("6,0 8,4 4,4", "#FFB627"),
+    frame: c => R(0, 2, 12, 12, "#6b4a2b") + R(1.5, 3.5, 9, 9, c) + C(6, 8, 2, "#fff"),
+    coffee: c => R(1, 2, 10, 14, c) + R(3, 4, 6, 3, "#FFB627") + R(3, 10, 6, 5, "#fff", .7),
+    lamp: c => C(6, 8, 7, "#fff7b0", .35) + R(5, 6, 2, 10, "#555") + P("1,7 11,7 8,0 4,0", c),
+    headphones: c => `<path d="M1.5 12 a4.5 9 0 0 1 9 0" stroke="${c}" stroke-width="2" fill="none"/>` + R(0, 10, 3, 6, c) + R(9, 10, 3, 6, c),
+    globe: c => C(6, 6, 6, c) + C(4, 5, 2, "#7cc47c") + R(5.5, 12, 1, 2, "#555") + R(2, 14, 8, 2, "#555"),
+    trophy: c => P("2,0 10,0 9,8 3,8", c) + R(5, 8, 2, 4, c) + R(3, 12, 6, 4, c),
+    monitor: c => R(0, 0, 28, 18, "#2B2A33") + R(2, 2, 24, 14, c) + R(12, 18, 4, 3, "#555") + R(7, 21, 14, 3, "#555"),
+    // floor
+    floorlamp: c => C(7, 10, 18, "#fff7b0", .18) + R(6, 16, 2, 48, "#8a8272") + P("0,18 14,18 11,2 3,2", c),
+    bigplant: c => R(2, 50, 10, 14, "#c76b4a") + C(7, 38, 9, c) + C(2, 30, 6, c) + C(12, 28, 6, c),
+    palm: c => R(6, 18, 3, 34, "#8a6a45") + C(7, 14, 6, c) + C(0, 20, 5, c) + C(14, 20, 5, c) + C(7, 8, 5, c) + R(2, 52, 10, 12, "#c76b4a"),
+    guitar: c => El(7, 48, 7, 9, c) + El(7, 34, 5, 6, c) + R(6, 6, 2, 28, "#6b4a2b") + C(7, 48, 2.5, "#2B2A33"),
+    // big furniture
+    sofa: c => R(4, 2, 56, 24, c) + R(0, 16, 64, 18, c) + R(0, 16, 64, 18, "#000", .12) + R(-2, 10, 8, 24, c) + R(58, 10, 8, 24, c) + R(6, 34, 4, 6, "#555") + R(54, 34, 4, 6, "#555"),
+    armchair: c => R(8, 6, 48, 22, c) + R(0, 14, 12, 22, c) + R(52, 14, 12, 22, c) + R(10, 24, 44, 12, c) + R(10, 24, 44, 12, "#000", .1) + R(10, 36, 4, 4, "#555") + R(50, 36, 4, 4, "#555"),
+    piano: c => R(0, 2, 64, 26, c) + R(4, 18, 56, 10, "#f5f5f5") + Array.from({ length: 8 }, (_, i) => R(8 + i * 7, 18, 3.5, 6, "#222")).join("") + R(4, 28, 4, 12, c) + R(56, 28, 4, 12, c) + R(8, 0, 48, 3, "#444"),
+    aquarium: c => R(0, 6, 64, 28, "#9ad8e8", .85) + R(0, 26, 64, 8, "#f1d99a") + P("16,14 26,19 16,24", c) + P("40,10 48,14 40,18", c) + C(30, 24, 2, "#7cc47c") + R(0, 4, 64, 3, "#2B2A33") + R(2, 34, 60, 6, "#8a6a45"),
+    // rugs and shelves
+    round: c => El(46, 10, 46, 10, c) + El(46, 10, 32, 6, "#fff", .35),
+    persian: c => El(46, 10, 46, 10, c) + El(46, 10, 38, 8, "#d4a017", .7) + El(46, 10, 28, 5.5, c) + P("46,5 56,10 46,15 36,10", "#d4a017"),
+    plain: c => books(["#FF7043", "#1BB5A8", "#FFB627", "#8a8272"], 7) + R(0, 12, 96, 4, c),
+    bright: c => books(["#FF7043", "#1BB5A8", "#FFB627", "#7B61FF", "#5fb36b"], 7) + R(0, 12, 96, 4, c),
+    library: c => books(["#7a2f3a", "#2f4a7a", "#d4a017", "#2f6a4a"], 7) + R(0, 12, 96, 4, c),
+    // transport
+    buscard: c => R(6, 6, 52, 28, c) + R(6, 12, 52, 6, "#2B2A33") + R(10, 24, 18, 3, "#fff", .85) + C(48, 26, 4, "#fff", .85),
+    metrocard: c => R(6, 6, 52, 28, c) + C(20, 20, 8, "#fff", .9) + R(32, 15, 20, 3, "#fff") + R(32, 22, 14, 3, "#fff"),
+    kick: c => wheel(10, 32, 5) + wheel(54, 32, 5) + R(10, 28, 44, 3, c) + R(50, 6, 3, 24, c) + R(44, 4, 14, 3, "#2B2A33"),
+    escooter: c => wheel(10, 32, 6) + wheel(54, 32, 6) + R(8, 27, 48, 4, c) + R(48, 4, 4, 24, c) + R(42, 2, 16, 3, "#2B2A33") + R(16, 22, 24, 5, "#2B2A33"),
+    bike: c => wheel(12, 28) + wheel(52, 28) + `<path d="M12 28 L28 12 L52 28 M28 12 L44 12 L52 28 M28 12 L30 6" stroke="${c}" stroke-width="3" fill="none"/>` + R(26, 4, 8, 2, "#2B2A33"),
+    ebike: c => SHAPES.bike(c) + R(26, 14, 10, 7, "#2B2A33") + R(28, 16, 6, 3, "#FFB627"),
+    moto: c => wheel(12, 30, 8) + wheel(52, 30, 8) + `<path d="M12 30 L26 16 L46 16 L52 30 M26 16 L22 8 L32 8" stroke="${c}" stroke-width="4" fill="none"/>` + R(28, 11, 18, 5, c) + R(18, 5, 14, 3, "#2B2A33"),
+    sportmoto: c => SHAPES.moto(c) + P("42,12 58,24 46,26 40,18", "#fff", .7),
+    cruiser: c => SHAPES.moto(c) + R(2, 5, 4, 3, "#bbb") + R(30, 22, 14, 4, "#bbb"),
+    car: c => R(2, 16, 60, 14, c) + P("14,16 22,4 44,4 54,16", c) + R(24, 6, 9, 8, "#d6f1fa") + R(35, 6, 9, 8, "#d6f1fa") + C(16, 32, 6, "#2B2A33") + C(48, 32, 6, "#2B2A33"),
+    sedan: c => R(0, 17, 64, 13, c) + P("12,17 20,6 44,6 54,17", c) + R(22, 8, 9, 8, "#d6f1fa") + R(33, 8, 9, 8, "#d6f1fa") + C(14, 32, 6, "#2B2A33") + C(50, 32, 6, "#2B2A33"),
+    suv: c => R(0, 12, 64, 18, c) + P("4,12 10,2 50,2 60,12", c) + R(12, 4, 11, 8, "#d6f1fa") + R(25, 4, 11, 8, "#d6f1fa") + R(38, 4, 11, 8, "#d6f1fa") + C(14, 32, 6, "#2B2A33") + C(50, 32, 6, "#2B2A33"),
+    sport: c => P("0,28 4,20 22,15 38,8 50,14 62,20 64,28 64,30 0,30", c) + P("27,15 38,9 46,15", "#d6f1fa") + C(14, 32, 6, "#2B2A33") + C(50, 32, 6, "#2B2A33"),
+    supercar: c => SHAPES.sport(c) + R(4, 24, 56, 2, "#fff", .8),
+    // clothes
+    tee: c => P("16,4 26,2 38,2 48,4 58,14 50,19 46,14 46,38 18,38 18,14 14,19 6,14", c) + P("26,2 38,2 32,9", "#FFF4DC"),
+    hoodie: c => SHAPES.tee(c) + C(32, 5, 9, c) + C(32, 7, 5, "#FFF4DC") + R(24, 27, 16, 7, "#000", .15),
+    pants: c => P("18,2 46,2 48,38 36,38 32,14 28,38 16,38", c) + R(18, 2, 28, 4, "#000", .2),
+    skirt: c => P("20,4 44,4 58,36 6,36", c) + R(20, 4, 24, 4, "#000", .2),
+    dress: c => P("24,2 40,2 42,12 46,16 56,38 8,38 18,16 22,12", c) + R(22, 14, 20, 3, "#fff", .5),
+    evening: c => SHAPES.dress(c) + C(24, 26, 1.5, "#fff") + C(38, 30, 1.5, "#fff") + C(30, 20, 1.5, "#fff"),
+    jacket: c => P("12,6 24,2 40,2 52,6 60,36 48,36 46,12 46,38 18,38 18,12 16,36 4,36", c) + R(31, 14, 2, 24, "#000", .25),
+    coat: c => P("12,4 24,2 40,2 52,4 60,38 4,38", c) + R(31, 6, 2, 32, "#000", .3) + C(27, 16, 1.5, "#fff") + C(27, 24, 1.5, "#fff"),
+    suit: c => SHAPES.jacket(c) + P("28,8 36,8 32,38", "#fff", .9) + P("31,12 33,12 34,24 30,24", "#FF7043"),
+    sneakers: c => P("4,26 22,22 30,26 56,28 60,34 4,34", c) + R(4, 32, 56, 4, "#fff") + R(24, 24, 10, 2, "#fff"),
+    boots: c => P("14,2 30,2 30,24 54,28 58,36 14,36", c) + R(14, 34, 44, 4, "#2B2A33"),
+    // accessories
+    cap: c => P("12,24 16,10 32,4 48,10 52,24", c) + R(30, 22, 30, 4, c) + R(30, 22, 30, 2, "#000", .2),
+    sunglasses: c => C(18, 20, 10, c) + C(46, 20, 10, c) + C(18, 20, 8, "#2B2A33") + C(46, 20, 8, "#2B2A33") + R(26, 18, 12, 3, c),
+    backpack: c => R(14, 6, 36, 32, c) + R(20, 22, 24, 12, "#000", .15) + R(26, 2, 12, 6, c) + R(30, 10, 4, 6, "#FFB627"),
+    handbag: c => R(10, 16, 44, 22, c) + `<path d="M20 16 a12 12 0 0 1 24 0" stroke="${c}" stroke-width="3" fill="none"/>` + R(28, 22, 8, 5, "#FFB627"),
+    watch: c => R(24, 2, 16, 10, "#555") + R(24, 28, 16, 10, "#555") + C(32, 20, 12, c) + C(32, 20, 9, "#FFF4DC") + R(31.5, 13, 1, 7, "#2B2A33") + R(32, 19.5, 5, 1, "#2B2A33"),
+    necklace: c => `<path d="M12 6 q20 36 40 0" stroke="#d4a017" stroke-width="2" fill="none"/>` + C(32, 27, 5, c),
+    ring: c => `<circle cx="32" cy="24" r="10" fill="none" stroke="#d4a017" stroke-width="4"/>` + P("32,4 39,11 32,18 25,11", c)
+  };
+  const itemSvg = it => { const [w, h] = SIZE[it.kind]; return `<svg viewBox="-6 -6 ${w + 12} ${h + 12}" xmlns="http://www.w3.org/2000/svg">${SHAPES[it.shape](it.color)}</svg>`; };
+  const at = (it, x, y) => `<g transform="translate(${x},${y})">${SHAPES[it.shape](it.color)}</g>`;
+  const KIND_TXT = { wall: "Hangs on the wall", desk: "Sits on your desk", deskbig: "Sits on your desk", floor: "Stands on the floor", big: "Needs a big home",
+                     rug: "Goes under your feet", shelf: "Hangs above your desk", obj: "Shows in My Stuff, not in the room" };
+  const has = it => it.owned || !!it.rented_until;
+
+  // ---------- home pictures for the cards (placeholders until real images) ----------
+  function art(scene, t) {
+    const sky = { city: "#9fd4ee", forest: "#c9ecc1", beach: "#9fd4ee", tower: "#9fb4ee", house: "#bfe3f5", villa: "#cfe8ff" }[scene];
+    const lit = ["#d9c58a", "#FFB627", "#FFD66B"][t];
+    const wall = ["#9a8f80", "#b8aa95", "#d6c4a4"][t];
+    const beach = scene === "beach";
+    const ground = beach ? "#e8d29a" : (scene === "city" || scene === "tower") ? "#a7a79f" : "#7cc47c";
+    let g = R(0, 0, 200, 120, sky) + R(0, beach ? 90 : 100, 200, 30, ground);
+    if (scene === "city") {
+      const h = [50, 62, 74][t];
+      g += R(10, 50, 40, 70, "#7f93a8") + R(150, 40, 40, 80, "#7f93a8");
+      g += R(65, 100 - h, 70, h, wall) + wc(100, 106 - h, 4, Math.floor((h - 12) / 16), 15, 16, 8, 9, lit) + R(95, 88, 10, 12, "#5a4632");
+    }
+    if (scene === "forest") {
+      const h = [40, 50, 60][t];
+      g += tree(25, 1.2) + tree(45, .9) + tree(155, 1) + tree(177, 1.3);
+      if (t >= 1) g += tree(8, 1) + tree(193, .9);
+      if (t === 2) g += tree(36, 1.5);
+      g += R(75, 100 - h, 50, h, wall) + wc(100, 108 - h, 3, Math.floor((h - 8) / 18), 14, 18, 8, 10, lit) + R(95, 90, 10, 10, "#5a4632");
+      if (t >= 1) g += R(70, 100 - h + 20, 60, 3, "#8a6a45");
+    }
+    if (beach) {
+      const w = [34, 44, 56][t], h = [34, 40, 48][t];
+      g += C(150, 48, [10, 13, 16][t], "#FFB627") + R(0, 70, 200, 20, "#38b6c9") + R(20, 78, 30, 1.5, "#d6f1fa") + R(110, 82, 40, 1.5, "#d6f1fa");
+      g += R(30, 96 - h, w, h, wall) + wc(30 + w / 2, 102 - h, Math.floor((w - 8) / 12), Math.floor((h - 8) / 16), 12, 16, 7, 9, lit);
+      if (t >= 1) g += R(160, 70, 2, 26, "#7a5a3a") + C(161, 68, 7, "#3f9a52");
+      if (t === 2) g += R(86, 88, 30, 3, "#8a6a45");
+    }
+    if (scene === "tower") {
+      const w = [40, 46, 52][t], h = [70, 82, 94][t], x = 100 - w / 2, y = 100 - h;
+      g += R(15, 55, 25, 65, "#6d86b5") + R(160, 45, 28, 75, "#6d86b5") + R(45, 70, 20, 50, "#8099c8");
+      g += R(x, y, w, h, wall) + wc(100, y + 14, [2, 3, 3][t], Math.floor((h - 20) / 16), 13, 16, 7, 9, lit);
+      g += R(x - 6, y - 3, w + 12, 4, "#8a8272") + C(x - 2, y - 7, 4, "#3f9a52") + C(x + w + 2, y - 7, 4, "#3f9a52");
+      if (t === 2) g += R(x - 6, y - 9, w + 12, 1.5, "#d6f1fa");
+    }
+    if (scene === "house") {
+      const roof = ["#8a5a48", "#c0603e", "#d9703f"][t];
+      g += C(35, 78, 14, "#3f9a52") + R(33, 88, 4, 12, "#7a5a3a");
+      if (t === 2) g += C(15, 84, 10, "#3f9a52") + R(13, 90, 3, 10, "#7a5a3a");
+      g += R(70, 70, 60, 30, wall) + P("62,70 100,44 138,70", roof) + R(96, 84, 9, 16, "#5a4632");
+      g += wc(82, 76, 1, 1, 0, 0, 10, 10, lit) + wc(118, 76, 1, 1, 0, 0, 10, 10, lit);
+      if (t >= 1) g += R(116, 48, 6, 14, wall);
+      for (let i = 0; i < 6; i++) g += R(150 + i * 8, 92, 2, 8, "#fff");
+      g += R(148, 95, 46, 1.5, "#fff");
+    }
+    if (scene === "villa") {
+      const x = [55, 45, 35][t], w = [90, 110, 130][t];
+      if (t === 2) g += C(18, 82, 12, "#3f9a52") + R(16, 90, 4, 10, "#7a5a3a") + C(184, 82, 12, "#3f9a52") + R(182, 90, 4, 10, "#7a5a3a");
+      g += R(x, 72, w, 28, wall) + R(x + 6, 77, w - 40, 18, lit);
+      for (let i = 1; i < 4; i++) g += R(x + 6 + i * (w - 40) / 4, 77, 1, 18, wall);
+      if (t >= 1) g += R(x + 20, 54, w - 50, 18, wall) + R(x + 26, 59, w - 62, 8, lit);
+      g += R(110, 103, 60, 10, "#38b6c9") + R(118, 107, 20, 1, "#d6f1fa");
+    }
+    return `<svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
+  }
+
+  // ---------- avatar (default one for now) ----------
+  const SKIN = "#c68e6a";
+  function avatar(ax) {
+    return R(ax - 6, 188, 5, 26, "#2B2A33") + R(ax + 1, 188, 5, 26, "#2B2A33") +
+      R(ax - 9, 160, 18, 30, "#1BB5A8") + R(ax - 12, 162, 3, 22, "#1BB5A8") + R(ax + 9, 162, 3, 22, "#1BB5A8") +
+      C(ax - 10.5, 186, 2.5, SKIN) + C(ax + 10.5, 186, 2.5, SKIN) + R(ax - 2, 156, 4, 6, SKIN) + C(ax, 150, 9, SKIN) +
+      `<path d="M${ax - 9} 150 a9 9 0 0 1 18 0z" fill="#2a1d14"/>` + R(ax - 9, 148, 3, 9, "#2a1d14") +
+      C(ax - 3, 151, 1, "#111") + C(ax + 3, 151, 1, "#111");
+  }
+  $("avatarBubble").innerHTML = `<svg width="68" height="68" viewBox="0 0 40 40"><rect width="40" height="40" fill="#CFF3EF"/><path d="M6 40 a14 12 0 0 1 28 0z" fill="#1BB5A8"/><circle cx="20" cy="17" r="8" fill="${SKIN}"/><path d="M12 17 a8 8 0 0 1 16 0z" fill="#2a1d14"/><circle cx="17" cy="18" r="1" fill="#111"/><circle cx="23" cy="18" r="1" fill="#111"/></svg>`;
+
+  // ---------- room interior (My House) ----------
+  const PAL = [["#a9c4d9", "#c79a68", "#cdeefb"], ["#a8cfa0", "#b98a58", "#d7f2d0"], ["#8fd3d9", "#e0c27e", "#cdeefb"],
+               ["#9aa8e0", "#cfc8d8", "#b9ccf7"], ["#f2c49b", "#c08a58", "#d6f0ff"], ["#b5d6c4", "#a8774a", "#d9ecff"]];
+  const PAL_SHARED = ["#c9b8a0", "#8d7155", "#cdeefb"];
+
+  function layout(home) {
+    const W = Math.round(220 + 240 * (1 - Math.exp(-(home ? home.m2 : 8) / 70)));
+    const x0 = (480 - W) / 2, x1 = x0 + W, px = f => x0 + f * W;
+    const bx = px(.05), dx = px(.55), ax = (bx + 92 + dx) / 2, cx = x0 + W / 2;
+    const big = [];
+    if (bx + 98 + 64 <= dx - 2) big.push(bx + 98);
+    const big2 = dx + 104 + 64 <= x1 - 24;
+    if (big2) big.push(dx + 104);
+    const floor = [x1 - 16];
+    if (!big2 && dx + 102 + 14 <= x1 - 20) floor.push(dx + 102);
+    const wall = [.70, .82, .94].map(f => px(f) - 12);
+    return { W, x0, x1, px, bx, dx, ax, cx, big, floor, wall };
+  }
+  const capacity = home => { const L = layout(home); return { wall: 3, desk: 3, floor: L.floor.length, big: L.big.length }; };
+
+  function view(cat, x, y, w) {
+    let v = "";
+    if (cat === 0) v += R(x + 6, y + 26, 14, 34, "#8da4b8") + R(x + 24, y + 14, 16, 46, "#8da4b8") + R(x + w - 24, y + 22, 18, 38, "#8da4b8");
+    if (cat === 3) v += R(x + 6, y + 26, 14, 34, "#6d86b5") + R(x + 24, y + 14, 16, 46, "#6d86b5") + R(x + w - 24, y + 22, 18, 38, "#6d86b5");
+    if (cat === 1 || cat === 4) v += P(`${x + 14},${y + 22} ${x + 3},${y + 60} ${x + 25},${y + 60}`, "#3f9a52") + P(`${x + w - 16},${y + 16} ${x + w - 29},${y + 60} ${x + w - 3},${y + 60}`, "#3f9a52");
+    if (cat === 2) v += C(x + w - 14, y + 16, 7, "#FFB627") + R(x, y + 36, w, 24, "#38b6c9");
+    if (cat === 5) v += P(`${x},${y + 60} ${x + w * .5},${y + 30} ${x + w},${y + 60}`, "#7cc47c");
+    return v;
+  }
+
+  function room(home, placed) {
+    const L = layout(home), { W, x0, x1, px, bx, dx, ax, cx } = L;
+    const cat = home ? CAT_ORDER.indexOf(home.category) : -1, t = home ? home.tier - 1 : 0;
+    const [wall, floor, sky] = home ? PAL[cat] : PAL_SHARED;
+    const lit = ["#d9c58a", "#FFB627", "#FFD66B"][t], ww = [56, 70, 90][t];
+    const of = k => placed.filter(i => i.kind === k);
+    let g = R(x0, 14, W, 176, wall) + (t === 0 ? R(x0, 14, W, 176, "#6b5a45", .22) : "") +
+            R(x0, 190, W, 64, floor) + R(x0, 190, W, 3, "#000", .25);
+    if (t > 0) g += R(x0, 186, W, 4, t === 2 ? "#FFB627" : "#e8dcc6");
+    const win = (x, w) => R(x - 3, 37, w + 6, 66, "#f4ede0") + R(x, 40, w, 60, sky) + view(Math.max(cat, 0), x, 40, w) + R(x + w / 2 - 1, 40, 2, 60, "#f4ede0");
+    g += win(px(.30) - ww / 2, ww);
+    if (t > 0 && W > 400) g += win(px(.56) - ww / 2, ww);
+    if (t === 0) g += C(px(.5), 120, 22, "#000", .1) + `<path d="M${px(.44)} 20 l6 30 l-8 22 l5 28" stroke="#000" stroke-opacity=".3" fill="none"/>`;
+    g += R(cx, 14, 1.5, 24, "#555") + C(cx, 42, [5, 6, 4][t], lit) + C(cx, 42, [22, 28, 40][t], lit, .25);
+    if (t === 2) g += R(cx - 16, 38, 32, 2, "#8a8272") + C(cx - 14, 43, 3, lit) + C(cx + 14, 43, 3, lit);
+    of("shelf").slice(0, 1).forEach(i => g += at(i, dx, 104));
+    of("wall").slice(0, 3).forEach((i, n) => g += at(i, L.wall[n], 50));
+    of("rug").slice(0, 1).forEach(i => g += at(i, ax - 46, 214));
+    // bed
+    g += R(bx - 3, 166, 5, 48, "#6b4a2b") + R(bx, 186, 92, 28, "#8a6a45") + R(bx, 178, 92, 12, ["#b59d7d", "#1BB5A8", "#FF7043"][t]) + R(bx + 5, 172, 24, 10, "#fff");
+    of("big").slice(0, L.big.length).forEach((i, n) => g += at(i, L.big[n], 174));
+    // desk + laptop
+    g += R(dx, 176, 96, 6, "#b07f4a") + R(dx + 4, 182, 5, 32, "#8a6a45") + R(dx + 87, 182, 5, 32, "#8a6a45");
+    g += R(dx + 36, 154, 28, 20, "#2B2A33") + R(dx + 38, 156, 24, 16, lit, .9) + R(dx + 32, 174, 36, 3, "#555");
+    const db = of("deskbig")[0];
+    if (db) g += at(db, dx + 2, 152);
+    const slots = db ? [dx + 68, dx + 84] : [dx + 68, dx + 84, dx + 2];
+    of("desk").slice(0, slots.length).forEach((i, n) => g += at(i, slots[n], 160));
+    // chair
+    g += R(dx + 18, 192, 26, 5, "#6b4a2b") + R(dx + 18, 164, 4, 30, "#6b4a2b") + R(dx + 21, 197, 3, 17, "#6b4a2b") + R(dx + 38, 197, 3, 17, "#6b4a2b");
+    of("floor").slice(0, L.floor.length).forEach((i, n) => g += at(i, L.floor[n], 150));
+    g += avatar(ax);
+    return `<svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
+  }
+
+  // ---------- helpers ----------
+  async function api(method, path, body) {
+    const r = await fetch(path, { method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.detail || "Something went wrong");
+    return data;
+  }
+  let toastTimer;
+  function toast(msg, bad) {
+    const t = $("toast");
+    t.textContent = msg; t.className = bad ? "bad" : ""; t.style.display = "block";
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.style.display = "none", 3500);
+  }
+  function goTab(name) {
+    document.querySelectorAll("#menu button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.id === name));
+  }
+  document.querySelectorAll("#menu button").forEach(btn => btn.addEventListener("click", () => goTab(btn.dataset.tab)));
+  $("avatarBubble").addEventListener("click", () => goTab("profile"));
+
+  // ---------- room limits ----------
+  const curHome = () => ME && ME.residence ? ME.residence.home : null;
+  function counts() {
+    const u = { wall: 0, desk: 0, floor: 0, big: 0 };
+    CAT.filter(i => i.placed).forEach(i => { const k = i.kind === "deskbig" ? "desk" : i.kind; if (k in u) u[k]++; });
+    return u;
+  }
+  function placeProblem(it) {
+    const cap = capacity(curHome()), u = counts(), k = it.kind;
+    if (k === "rug" || k === "shelf") return null;
+    if (k === "deskbig") return (CAT.some(i => i.placed && i.kind === "deskbig") || u.desk < 3) ? null : "Your desk is full. Put something away first.";
+    if (k === "desk") return u.desk < 3 ? null : "Your desk is full. Put something away first.";
+    if (k === "wall") return u.wall < 3 ? null : "The walls are full. Put something away first.";
+    if (k === "floor") return u.floor < cap.floor ? null : "No more floor space here. Try a bigger home!";
+    if (k === "big") return cap.big === 0 ? "This room is too small for big furniture. Rent a bigger home!" : (u.big < cap.big ? null : "No more space for big furniture here.");
+    return null;
+  }
+
+  // ---------- rendering ----------
+  function renderHouse() {
+    const r = ME.residence, home = curHome();
+    const placed = CAT.filter(i => i.placed);
+    const nCloset = CAT.filter(i => i.tab === "furniture" && has(i) && !i.placed).length;
+    const nStuff = CAT.filter(i => i.tab === "objects" && has(i)).length;
+    let h = `<h2>My House</h2><div class="roomwrap">${room(home, placed)}
+      <div class="roombtns"><button data-act="closet" class="${panel === "closet" ? "on" : ""}">🧺 Closet${nCloset ? " (" + nCloset + ")" : ""}</button>
+      <button data-act="stuff" class="${panel === "stuff" ? "on" : ""}">🎒 My Stuff${nStuff ? " (" + nStuff + ")" : ""}</button></div></div>`;
+    if (!r) {
+      h += "<p>A shabby shared room in an apartment. Go to Real Estate to rent or buy a home.</p>";
+    } else {
+      h += `<p><b>${esc(home.name)}</b> · ${esc(home.category)} · ${home.m2} m²</p>`;
+      if (r.mode === "owned") {
+        h += "<p>You own this home. 🎉</p>";
+      } else if (r.expired) {
+        h += `<div class="warn">Your ${r.mode} rental has ended. Renew for ${fmt(home[r.mode])} h, or go back to the shared room.<br>
+              <button data-act="renew">Renew</button><button data-act="leave">Go back to the shared room</button></div>`;
+      } else {
+        h += `<p>Renting by the ${r.mode}. Ends ${new Date(r.expires * 1000).toLocaleString()}.</p><button data-act="leave">Leave (no refund)</button>`;
+      }
+    }
+    $("roomCard").innerHTML = h;
+    renderSide();
+  }
+
+  function renderSide() {
+    const el = $("sidePanel");
+    el.style.display = panel ? "block" : "none";
+    if (!panel) return;
+    if (panel === "closet") {
+      const cap = capacity(curHome()), u = counts();
+      const list = CAT.filter(i => i.tab === "furniture" && has(i));
+      let h = `<h3>🧺 Your closet</h3><p class="soon">Space here: wall ${u.wall}/3 · desk ${u.desk}/3 · floor ${u.floor}/${cap.floor} · big ${u.big}/${cap.big}</p>`;
+      h += list.length ? list.map(it => `<div class="crow"><div class="cprev">${itemSvg(it)}</div>
+          <div style="flex:1"><b>${esc(it.name)}</b><br><small>${it.placed ? "In your room" : "In the closet"}${it.rented_until ? " · rented" : ""}</small></div>
+          <button data-act="${it.placed ? "unplace" : "place"}" data-key="${it.key}">${it.placed ? "Put away" : "Place"}</button></div>`).join("")
+        : `<p>Empty for now! Buy things in <b>Furniture</b>.</p>`;
+      el.innerHTML = h;
+    } else {
+      const list = CAT.filter(i => i.tab === "objects" && has(i));
+      if (!list.some(i => i.key === sel)) sel = list.length ? list[0].key : null;
+      const cur = list.find(i => i.key === sel);
+      let h = `<h3>🎒 My Stuff</h3>`;
+      if (!list.length) { el.innerHTML = h + `<p>Nothing yet! Get a bus pass, a bike or new clothes in <b>Objects</b>.</p>`; return; }
+      h += `<div class="disp">${itemSvg(cur)}</div><p><b>${esc(cur.name)}</b><br><small class="soon">${cur.owned ? "Yours" : "Rented until " + new Date(cur.rented_until * 1000).toLocaleString()}</small></p>`;
+      h += `<div class="thumbs">` + list.map(i => `<div class="th ${i.key === sel ? "on" : ""}" data-act="sel" data-key="${i.key}" title="${esc(i.name)}">${itemSvg(i)}</div>`).join("") + `</div>`;
+      el.innerHTML = h;
+    }
+  }
+
+  function itemCard(it) {
+    const v = it.price != null ? it.price : (it.rent_month ? it.rent_month * 12 : (it.rent_day || 0) * 40);
+    const tag = v < 20 ? ["simple", "#1BB5A8", "#fff"] : v < 100 ? ["nice", "#FFB627", "#2B2A33"] : ["luxury ✨", "#7B61FF", "#fff"];
+    let rows = `<div class="price by"><span>Buy</span><span>${it.price != null ? fmt(it.price) + " h" : "Rent only"}</span></div>`;
+    if (it.rent_day != null) rows += `<div class="price d"><span>Rent / day</span><span>${fmt(it.rent_day)} h</span></div>`;
+    if (it.rent_month != null) rows += `<div class="price mo"><span>Rent / month</span><span>${fmt(it.rent_month)} h</span></div>`;
+    let btns = "";
+    if (it.owned) {
+      btns = `<p class="here">${it.tab === "furniture" ? (it.placed ? "In your room ✓" : "In your closet ✓") : "Yours ✓ (see My Stuff)"}</p>`;
+    } else {
+      if (it.rented_until) btns += `<p class="here">Rented until ${new Date(it.rented_until * 1000).toLocaleDateString()}</p>`;
+      if (it.price != null) btns += `<button data-act="shopbuy" data-key="${it.key}" data-name="${esc(it.name)}" data-price="${it.price}" data-tab="${it.tab}">Buy</button>`;
+      if (it.rent_day != null) btns += `<button data-act="shoprent" data-key="${it.key}" data-mode="day" data-name="${esc(it.name)}" data-price="${it.rent_day}">${it.rented_until ? "Extend a day" : "Rent a day"}</button>`;
+      if (it.rent_month != null) btns += `<button data-act="shoprent" data-key="${it.key}" data-mode="month" data-name="${esc(it.name)}" data-price="${it.rent_month}">${it.rented_until ? "Extend a month" : "Rent a month"}</button>`;
+    }
+    return `<div class="item"><div class="prev">${itemSvg(it)}</div><h4>${esc(it.name)}</h4>
+      <span class="tag" style="background:${tag[1]};color:${tag[2]}">${tag[0]}</span>${rows}
+      <div class="hint">${KIND_TXT[it.kind]}</div>${btns}</div>`;
+  }
+
+  function renderShop(tab) {
+    const sub = subSel[tab];
+    const nav = SUBS[tab].map(([k, n]) => `<button data-act="sub" data-tab="${tab}" data-sub="${k}" class="${k === sub ? "on" : ""}">${n}</button>`).join("");
+    const items = CAT.filter(i => i.tab === tab && i.sub === sub);
+    $("shop-" + tab).innerHTML = `<div class="subnav">${nav}</div><div class="grid">${items.map(itemCard).join("")}</div>`;
+  }
+
+  function renderHomes() {
+    const cur = ME.residence && !ME.residence.expired ? ME.residence.home.key : null;
+    $("homes").innerHTML = CAT_ORDER.map((cat, idx) => {
+      const list = HOMES.filter(h => h.category === cat);
+      return `<h3>${esc(cat)}</h3><div class="homegrid">` + list.map(h => {
+        let btns;
+        if (h.owned) {
+          btns = cur === h.key ? `<p class="here">You live here</p>` : `<button data-act="move" data-key="${h.key}">Move in</button>`;
+        } else {
+          btns = (cur === h.key ? `<p class="here">You rent this home</p>` : "") +
+            `<button data-act="rent" data-key="${h.key}" data-mode="day">Rent a day</button>` +
+            `<button data-act="rent" data-key="${h.key}" data-mode="month">Rent a month</button>` +
+            `<button data-act="buy" data-key="${h.key}" data-name="${esc(h.name)}" data-price="${h.buy}">Buy</button>`;
+        }
+        return `<div class="home">
+          ${art(SCENES[idx], h.tier - 1)}
+          <h4>${esc(h.name)}</h4>
+          <div class="m2">${h.m2} m²</div>
+          <div class="price d"><span>Rent / day</span><span>${fmt(h.day)} h</span></div>
+          <div class="price mo"><span>Rent / month</span><span>${fmt(h.month)} h</span></div>
+          <div class="price by"><span>Buy</span><span>${fmt(h.buy)} h</span></div>
+          ${btns}
+          <button data-act="info">More info</button>
+          <p class="desc">${esc(h.descr)}</p></div>`;
+      }).join("") + `</div>`;
+    }).join("");
+  }
+
+  function renderSessions() {
+    if (SES.active) {
+      $("sessionCard").innerHTML = `<h2>Sessions</h2><p>Session running: <b>${esc(SES.active.task)}</b></p>
+        <p class="soon">No timer on screen, on purpose. Your hours are counted when you stop.</p>
+        <button data-act="stop">Stop and collect hours</button>`;
+    } else {
+      $("sessionCard").innerHTML = `<h2>Sessions</h2><p>What will you work on?</p>
+        <input id="task" placeholder="Ex: revise chapter 3" maxlength="200"><button data-act="start">Start session</button>`;
+    }
+    $("workoutCard").innerHTML = `<h3>Workout (honour mode)</h3>
+      <p class="soon">Same rate as work, max 1 h per day. Left today: ${SES.workout_left_today} h</p>
+      <input id="wh" type="number" step="0.25" min="0.25" max="1" value="0.5" style="width:90px"><button data-act="workout">Log workout</button>`;
+    $("historyCard").innerHTML = "<h3>History</h3>" + (SES.history.length
+      ? "<ul>" + SES.history.map(s => `<li>${s.kind === "workout" ? "Workout" : esc(s.task)} · +${s.hours} h · ${new Date(s.ended * 1000).toLocaleString()}</li>`).join("") + "</ul>"
+      : `<p class="soon">No session yet.</p>`);
+  }
+
+  function renderProfile() {
+    const s = ME.stats, home = curHome();
+    $("profileCard").innerHTML = `<h2>Profile</h2>
+      <p>Level <b>${s.level}</b> · Day <b>${s.days}</b> of your journey</p>
+      <p>Total hours earned: <b>${s.total_hours} h</b></p>
+      <p>Started on ${new Date(s.created * 1000).toLocaleDateString()}</p>
+      <p>Current home: <b>${home ? esc(home.name) : "Shared room"}</b></p>`;
+  }
+
+  // ---------- popup when a home rental ends ----------
+  function checkExpiry() {
+    const r = ME && ME.residence;
+    if (!r || !r.expired || modalFor === r.expires) return;
+    modalFor = r.expires;
+    const cost = r.home[r.mode], can = ME.hours >= cost;
+    $("mbox").innerHTML = `<h2>⏰ Your ${r.mode} rental has ended</h2><p><b>${esc(r.home.name)}</b></p>
+      <p>Do you want to continue for <b>${fmt(cost)} h</b>? You have ${ME.hours} h.</p>` +
+      (can ? `<button data-act="mrenew">Yes, keep my home</button>` : `<p class="warn">Not enough hours to renew right now.</p>`) +
+      `<button data-act="mleave">Go back to the shared room</button><button data-act="mlater">Decide later</button>`;
+    $("modal").style.display = "flex";
+  }
+  setInterval(() => {
+    const r = ME && ME.residence;
+    if (r && r.mode !== "owned" && !r.expired && r.expires * 1000 < Date.now()) refresh().catch(() => {});
+  }, 10000);
+
+  async function refresh() {
+    [ME, HOMES, SES, CAT] = await Promise.all([api("GET", "/me"), api("GET", "/homes"), api("GET", "/sessions"), api("GET", "/catalog")]);
+    $("balance").textContent = ME.hours + " h";
+    $("lvl").textContent = `Level ${ME.stats.level} · Day ${ME.stats.days}`;
+    renderHouse(); renderHomes(); renderShop("furniture"); renderShop("objects"); renderSessions(); renderProfile();
+    checkExpiry();
+  }
+
+  // ---------- clicks ----------
+  document.body.addEventListener("click", async e => {
+    const b = e.target.closest("[data-act]");
+    if (!b) return;
+    const d = b.dataset;
+    if (d.act === "info") { b.parentElement.querySelector(".desc").classList.toggle("show"); return; }
+    if (d.act === "closet" || d.act === "stuff") { panel = panel === d.act ? null : d.act; renderHouse(); return; }
+    if (d.act === "sel") { sel = d.key; renderSide(); return; }
+    if (d.act === "sub") { subSel[d.tab] = d.sub; renderShop(d.tab); return; }
+    if (d.act === "mlater") { $("modal").style.display = "none"; return; }
+    try {
+      if (d.act === "rent") { await api("POST", `/rent/${d.key}/${d.mode}`); toast("Rented. Welcome home!"); }
+      else if (d.act === "buy") {
+        if (!confirm(`Buy ${d.name} for ${fmt(d.price)} h? This cannot be undone.`)) return;
+        await api("POST", `/buy-home/${d.key}`); toast("It's yours! 🎉");
+      }
+      else if (d.act === "move") { await api("POST", `/move/${d.key}`); toast("You moved in."); }
+      else if (d.act === "renew") { await api("POST", "/renew"); toast("Rental renewed."); }
+      else if (d.act === "leave") { await api("POST", "/leave"); toast("Back to the shared room."); }
+      else if (d.act === "mrenew") { $("modal").style.display = "none"; await api("POST", "/renew"); toast("Rental renewed. Enjoy!"); }
+      else if (d.act === "mleave") { $("modal").style.display = "none"; await api("POST", "/leave"); toast("Back to the shared room."); }
+      else if (d.act === "shopbuy") {
+        if (Number(d.price) >= 100 && !confirm(`Buy ${d.name} for ${fmt(d.price)} h?`)) return;
+        await api("POST", `/buy/${d.key}`);
+        toast(d.tab === "furniture" ? "In your closet! Open it from My House." : "Yours! Find it in My Stuff.");
+      }
+      else if (d.act === "shoprent") {
+        if (Number(d.price) >= 100 && !confirm(`Rent ${d.name} for ${fmt(d.price)} h?`)) return;
+        await api("POST", `/rent-item/${d.key}/${d.mode}`); toast("Rented!");
+      }
+      else if (d.act === "place") {
+        const it = CAT.find(i => i.key === d.key), problem = placeProblem(it);
+        if (problem) { toast(problem, true); return; }
+        await api("POST", `/place/${d.key}`);
+      }
+      else if (d.act === "unplace") { await api("POST", `/unplace/${d.key}`); }
+      else if (d.act === "start") { await api("POST", "/sessions/start", { task: $("task").value }); toast("Session started. Focus!"); }
+      else if (d.act === "stop") { const r = await api("POST", "/sessions/stop"); toast(`+${r.hours_earned} h collected`); }
+      else if (d.act === "workout") { const r = await api("POST", "/workout", { hours: parseFloat($("wh").value) }); toast(`+${r.hours_earned} h for your workout`); }
+      await refresh();
+    } catch (err) { toast(err.message, true); }
+  });
+
+  refresh().catch(err => toast(err.message, true));
+</script>
+<script src="/diary.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+# your data: never publish it
+*.db
+*.sqlite
+*.sqlite3
+
+# secrets
+.env
+*.key
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
