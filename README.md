@@ -3,7 +3,9 @@
 
 **Focus hours become a home.** You work, the app counts your real focus time, and you spend those hours on a virtual home, furniture and objects. Around it sits a private diary with an AI companion that notices how you are doing.
 
-https://github.com/user-attachments/assets/cdffd292-cafb-461d-8b42-3158572d8c9f
+[![Watch the Endelea demo (1:36)](https://img.youtube.com/vi/4Tk1k8D0KwE/hqdefault.jpg)](https://www.youtube.com/watch?v=4Tk1k8D0KwE)
+
+**[▶ Watch the 1:36 demo on YouTube](https://www.youtube.com/watch?v=4Tk1k8D0KwE)**
 
 ![My House](docs/house.png)
 
@@ -75,6 +77,12 @@ This is a **working prototype**, not a finished product.
 - **The community is a demo.** A real one needs accounts, a shared server and protection against fake hours. That is the next step.
 - **No AI work check yet.** Hours come from the session timer. Having the AI verify that the stated task was really worked on is planned, not built.
 - AI answers were tested against a simulated Gemini; real answers and speed depend on Google's free tier, which is sometimes busy. The app retries and falls back to other Gemini models automatically.
+
+## What's next: more than 24 hours a day
+
+Look closely at the shop and you'll notice something odd: renting The Estate costs 30 hours a day, a luxury sedan 52, a supercar 100. Nobody has that many hours in a day. That's on purpose.
+
+Next, Endelea will let you build a team. You'll be able to run a group or hire other people, and a share of the hours they focus will come to you, the way a business owner earns from the people working for them. That's the only way past 24 hours a day, in Endelea as in real life. It's also how some people end up with more than one lifetime of work could ever earn.
 
 ## Project layout
 
